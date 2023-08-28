@@ -1,0 +1,7 @@
+Metadata-Version: 2.1
+Name: pyomni
+Version: 0.0
+Summary: A pythonic interface for working in Omniverse.
+Home-page: https://github.com/jolfss/pyomni
+Author: Sean Brynjólfsson
+License-File: LICENSE

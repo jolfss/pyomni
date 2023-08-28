@@ -10,9 +10,10 @@ from .prims import Prim
 
 class Cube(Prim):
     def __init__(self, prim_path : str):
-        super(prim_path)
+        super().__init__(prim_path)
         UsdGeom.Cube.Define(stage(), prim_path)
-        self._displayColorAttr = self.Prim.GetDisplayColorAttr()
+        self._displayColorAttr = self.Prim.GetAttribute('primvars:displayColor')
+
 
     @property
     def color(self):

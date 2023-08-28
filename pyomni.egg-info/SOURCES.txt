@@ -1,0 +1,12 @@
+LICENSE
+README.md
+setup.py
+pyomni.egg-info/PKG-INFO
+pyomni.egg-info/SOURCES.txt
+pyomni.egg-info/dependency_links.txt
+pyomni.egg-info/top_level.txt
+stage/__init__.py
+stage/core.py
+stage/cube.py
+stage/point_instancer.py
+stage/prims.py

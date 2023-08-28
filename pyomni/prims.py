@@ -9,6 +9,14 @@ from pxr import UsdGeom, Usd
 from .core import *
 
 class Prim():
+    """Represents a generic primitive in the current Usd context.
+    Attributes:
+        Prim (Usd.Prim): The object containing the entire interface exposed to Python. 
+        exists (bool): True if [prim_path] is occupied.
+    Methods:
+        toggle(self, force_visibility:bool option): Toggles the prim's visibility
+            TODO: This is probably UsdGeom specific? Figure out if this is safe for non-geoms/change this entirely.
+        delete(self): Removes this prim from the stage"""
     def __init__(self, prim_path : str):
         self.prim_path = prim_path
         self.visible = True

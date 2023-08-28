@@ -12,7 +12,7 @@ from .prims import *
 class PointInstancer(Prim):
     """Python wrapper class for the UsdGeom.PointInstancer."""
     def __init__(self, prim_path : str):
-        Prim.__init__(prim_path)
+        super().__init__(prim_path)
         self._PointInstancer = UsdGeom.PointInstancer.Define(stage(),self.prim_path)
         self._PositionsAttr = self.instancer.CreatePositionsAttr().Set(Vt.Vec3fArray(1))
         self._ProtoIndicesAttr = self.instancer.CreateProtoIndicesAttr().Set(Vt.IntArray(1))
@@ -31,7 +31,7 @@ class PointInstancer(Prim):
     
     @property
     def protoindices(self):
-        return self._ProtoIndicesAttr
+        return self._ProtoIndicesAttr # TODO: These attribute references might expire..?
     @protoindices.setter
     def positions(self, new_protoindices : np.ndarray):
         min_protoindex = new_protoindices.min()
