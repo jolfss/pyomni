@@ -34,7 +34,6 @@ def main():
     cube1 = cube.Cube("/World/mycube")
     point_instancer1 = point_instancer.PointInstancer("/World/mypointinstancer")
 
-    breakpoint()
     point_instancer1.add_target(cube1)
     point_instancer1.protoindices = np.array([0])
     point_instancer1.positions = np.array([3,3,3])

@@ -14,9 +14,13 @@ class PointInstancer(Prim):
     def __init__(self, prim_path : str):
         super().__init__(prim_path)
         self._PointInstancer = UsdGeom.PointInstancer.Define(stage(),self.prim_path)
-        self._PositionsAttr = self.instancer.CreatePositionsAttr().Set(Vt.Vec3fArray(1))
-        self._ProtoIndicesAttr = self.instancer.CreateProtoIndicesAttr().Set(Vt.IntArray(1))
-        self._PrototypesRel = self.instancer.CreatePrototypesRel()
+        self._PositionsAttr = self.instancer.GetPositionsAttr()
+        self._ProtoIndicesAttr = self.instancer.GetProtoIndicesAttr()
+        self._PrototypesRel = self.instancer.GetPrototypesRel()
+
+        #Initialize
+        self._PositionsAttr.Set(Vt.Vec3fArray(1))
+        self._ProtoIndicesAttr.Set(Vt.IntArray(1))
 
     @property
     def instancer(self) -> UsdGeom.PointInstancer:
@@ -26,21 +30,21 @@ class PointInstancer(Prim):
     def positions(self):
         return self._PositionsAttr
     @positions.setter
-    def positions(self, np_array : np.array):
+    def positions(self, np_array : np.ndarray):
         self.positions.Set(Vt.Vec3fArray.FromNumpy(np_array))
     
     @property
     def protoindices(self):
         return self._ProtoIndicesAttr # TODO: These attribute references might expire..?
     @protoindices.setter
-    def positions(self, new_protoindices : np.ndarray):
+    def protoindices(self, new_protoindices : np.ndarray):
         min_protoindex = new_protoindices.min()
         max_protoindex = new_protoindices.max()
         if min_protoindex < 0:
             warn(F"PointInstancer recieved index that does not map to a target {min_protoindex}.")
         if max_protoindex >= len(self.targets):
             warn(F"PointInstancer recieved and index greater than any existing target {max_protoindex}.")
-        self.positions.Set(Vt.IntArray.FromNumpy(new_protoindices))
+        self.protoindices.Set(Vt.IntArray.FromNumpy(new_protoindices))
 
     @property
     def prototype_relations(self):
@@ -66,4 +70,4 @@ class PointInstancer(Prim):
 
     def delete(self):
         self.clear_targets()
-        super().delete(self.prim_path)
+        super().delete()
