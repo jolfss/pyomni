@@ -6,7 +6,8 @@ from omni.isaac.core.simulation_context import SimulationContext
 import numpy as np
 
 #pyomni
-from pyomni import cube, point_instancer
+from pyomni.cube import Cube
+from pyomni.instancer import Instancer
 
 class IsaacSimRunner(object):
     """Runs omniverse."""
@@ -31,12 +32,12 @@ def main():
     simulation_app.update()
     #begin custom code
 
-    cube1 = cube.Cube("/World/mycube")
-    point_instancer1 = point_instancer.PointInstancer("/World/mypointinstancer")
+    cube1 = Cube("/World/mycube")
+    point_instancer1 = Instancer("/World/mypointinstancer")
 
     point_instancer1.add_target(cube1)
-    point_instancer1.protoindices = np.array([0])
-    point_instancer1.positions = np.array([3,3,3])
+    point_instancer1.protoindices = np.array([0]*8)
+    point_instancer1.positions = np.array([[x,y,z] for x in {-2,2} for y in {-2,2} for z in {-2,2}])
 
     #end custom code
     isaac_sim_runner.run()

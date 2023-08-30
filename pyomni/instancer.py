@@ -9,22 +9,22 @@ from pxr import UsdGeom, Gf, Vt, Usd, Sdf
 from .core import *
 from .prims import *
 
-class PointInstancer(Prim):
-    """Python wrapper class for the UsdGeom.PointInstancer."""
+class Instancer(Visible):
+    """Python wrapper class for the UsdGeom.PointInstancer.
+    Attributes: 
+        + [all attributes inherited from Primitive superclass]
+    Methods:
+        """
     def __init__(self, prim_path : str):
         super().__init__(prim_path)
         self._PointInstancer = UsdGeom.PointInstancer.Define(stage(),self.prim_path)
-        self._PositionsAttr = self.instancer.GetPositionsAttr()
-        self._ProtoIndicesAttr = self.instancer.GetProtoIndicesAttr()
-        self._PrototypesRel = self.instancer.GetPrototypesRel()
+        self._PositionsAttr = self._PointInstancer.GetPositionsAttr()
+        self._ProtoIndicesAttr = self._PointInstancer.GetProtoIndicesAttr()
+        self._PrototypesRel = self._PointInstancer.GetPrototypesRel()
 
         #Initialize
         self._PositionsAttr.Set(Vt.Vec3fArray(1))
         self._ProtoIndicesAttr.Set(Vt.IntArray(1))
-
-    @property
-    def instancer(self) -> UsdGeom.PointInstancer:
-        return self._PointInstancer
 
     @property
     def positions(self):
@@ -35,7 +35,7 @@ class PointInstancer(Prim):
     
     @property
     def protoindices(self):
-        return self._ProtoIndicesAttr # TODO: These attribute references might expire..?
+        return self._ProtoIndicesAttr
     @protoindices.setter
     def protoindices(self, new_protoindices : np.ndarray):
         min_protoindex = new_protoindices.min()
@@ -53,10 +53,10 @@ class PointInstancer(Prim):
     @property
     def targets(self) -> List[Sdf.Path]:
         return self.prototype_relations.GetTargets()
-    def add_target(self, target : Prim):
+    def add_target(self, target : Visible):
         self.prototype_relations.AddTarget(target.prim_path)
 
-    def remove_target(self, target : Prim):
+    def remove_target(self, target : Visible):
         self.prototype_relations.RemoveTarget(target.prim_path)
 
     def clear_placements(self):

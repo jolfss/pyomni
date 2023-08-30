@@ -6,13 +6,13 @@ from pxr import UsdGeom, Gf
 
 # library imports
 from .core import stage
-from .prims import Prim
+from .prims import Visible
 
-class Cube(Prim):
+class Cube(Visible):
     def __init__(self, prim_path : str):
         super().__init__(prim_path)
         UsdGeom.Cube.Define(stage(), prim_path)
-        self._displayColorAttr = self.Prim.GetAttribute('primvars:displayColor')
+        self._displayColorAttr = self.UsdPrim.GetAttribute('primvars:displayColor')
 
 
     @property
@@ -25,7 +25,7 @@ class Cube(Prim):
 
     @property
     def scale(self):
-        xformable = UsdGeom.Xformable(self.Prim)
+        xformable = UsdGeom.Xformable(self.UsdPrim)
         scaleOp = None # check on if prim already has scale op
         for op in xformable.GetOrderedXformOps():
             if op.GetOpType() == UsdGeom.XformOp.TypeScale:
