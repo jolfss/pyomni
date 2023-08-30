@@ -103,3 +103,28 @@ class Scaleable(Imageable):
     @scale.setter
     def scale(self, new_scales:np.ndarray):
         self._scaleOp.Set(new_scales)
+
+class Rotatable(Imageable):
+    # TODO: quaternion representation thing.
+    """Represents a prim that can be rotated.
+    Attribute:
+        rotation (np.ndarray): (3,) float array [x,y,z] for the scale of the cube in each dimension."""
+    def __init__(self, prim_path):
+        super().__init__(prim_path)
+        
+    @property
+    def scale(self) -> np.ndarray:
+        """A (3,) array containing the [x,y,z] scale of the primitive."""
+        xformable = UsdGeom.Xformable(self.UsdPrim)
+        scaleOp = None # Checks to make sure scale op hasn't been removed/changed reference.
+        for op in xformable.GetOrderedXformOps():
+            if op.GetOpType() == UsdGeom.XformOp.TypeScale:
+                scaleOp = op
+                break
+        if not scaleOp:
+            scaleOp = xformable.AddScaleOp()
+        self._scaleOp = scaleOp
+        return np.copy(scaleOp.Get())
+    @scale.setter
+    def scale(self, new_scales:np.ndarray):
+        self._scaleOp.Set(new_scales)
