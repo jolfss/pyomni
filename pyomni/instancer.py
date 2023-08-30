@@ -9,11 +9,18 @@ from pxr import UsdGeom, Gf, Vt, Usd, Sdf
 from .core import *
 from .prims import *
 
-class Instancer(Visible):
+class Instancer(Imageable):
     """Python wrapper class for the UsdGeom.PointInstancer.
-    Attributes: 
-        + [all attributes inherited from Primitive superclass]
+    Attributes:
+        positions (ndarray): (N,3) array of positions, 
+        protoindices (ndarray): (N) array that specifies which prim should show up at each position.
+            i.e., each element in [protoindices] is the index of the corresponding prim in [targets].
     Methods:
+        get_targets() -> List: 
+        add_target(target : Imageable): Appends an imageable target to the list of prims to display and returns the
+            index which should be used to reference it as a protoindex.
+        remove_target(target : Imageable): Removes a target from the list of registered targets.
+            NOTE: This will decrement the protoindices of all targets which have been added after the removal target.
         """
     def __init__(self, prim_path : str):
         super().__init__(prim_path)
@@ -27,46 +34,49 @@ class Instancer(Visible):
         self._ProtoIndicesAttr.Set(Vt.IntArray(1))
 
     @property
-    def positions(self):
-        return self._PositionsAttr
+    def positions(self) -> np.ndarray:
+        return np.copy(self._PositionsAttr.Get())
     @positions.setter
     def positions(self, np_array : np.ndarray):
-        self.positions.Set(Vt.Vec3fArray.FromNumpy(np_array))
+       self._PositionsAttr.Set(Vt.Vec3fArray.FromNumpy(np_array))
     
     @property
-    def protoindices(self):
-        return self._ProtoIndicesAttr
+    def protoindices(self) -> np.ndarray:
+        return np.copy(self._ProtoIndicesAttr.Get())
     @protoindices.setter
     def protoindices(self, new_protoindices : np.ndarray):
         min_protoindex = new_protoindices.min()
         max_protoindex = new_protoindices.max()
         if min_protoindex < 0:
-            warn(F"PointInstancer recieved index that does not map to a target {min_protoindex}.")
-        if max_protoindex >= len(self.targets):
-            warn(F"PointInstancer recieved and index greater than any existing target {max_protoindex}.")
-        self.protoindices.Set(Vt.IntArray.FromNumpy(new_protoindices))
-
-    @property
-    def prototype_relations(self):
-        return self._PrototypesRel
+            warn(F"Instancer recieved index that does not map to a target {min_protoindex}.")
+        if max_protoindex >= len(self.get_targets()):
+            warn(F"Instancer recieved and index greater than any existing target {max_protoindex}.")
+        self._ProtoIndicesAttr.Set(Vt.IntArray.FromNumpy(new_protoindices))
     
-    @property
-    def targets(self) -> List[Sdf.Path]:
-        return self.prototype_relations.GetTargets()
-    def add_target(self, target : Visible):
-        self.prototype_relations.AddTarget(target.prim_path)
+    def num_targets(self):
+        return len(self._PrototypesRel.GetTargets())
 
-    def remove_target(self, target : Visible):
-        self.prototype_relations.RemoveTarget(target.prim_path)
+    def get_targets(self) -> List[Imageable]:
+        lst = []
+        for t in self._PrototypesRel.GetTargets():
+            lst.append(Imageable(t.pathString))
+        return lst
+    
+    def add_target(self, target : Imageable):
+        self._PrototypesRel.AddTarget(target.prim_path)
+        return self.num_targets() - 1
+
+    def remove_target(self, target : Imageable):
+        self._PrototypesRel.RemoveTarget(target.prim_path)
 
     def clear_placements(self):
-        self.protoindices.Clear()
-        self.positions.Clear()
+        self._ProtoIndicesAttr.Clear()
+        self._PositionsAttr.Clear()
     
     def clear_targets(self):
         self.clear_placements()
-        self.prototype_relations.ClearTargets()
-        self.prototype_relations.ClearConnections()
+        self._PrototypesRel.ClearTargets()
+        self._PrototypesRel.ClearConnections()
 
     def delete(self):
         self.clear_targets()

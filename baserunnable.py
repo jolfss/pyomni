@@ -33,12 +33,24 @@ def main():
     #begin custom code
 
     cube1 = Cube("/World/mycube")
-    point_instancer1 = Instancer("/World/mypointinstancer")
+    cube2 = Cube("/World/mycube2")
+    instancer = Instancer("/World/mypointinstancer")
 
-    point_instancer1.add_target(cube1)
-    point_instancer1.protoindices = np.array([0]*8)
-    point_instancer1.positions = np.array([[x,y,z] for x in {-2,2} for y in {-2,2} for z in {-2,2}])
+    instancer.add_target(cube1)
+    instancer.add_target(cube2)
 
+    dim = 50
+    dims=range(-dim,dim)
+    instancer.protoindices = np.array([(x+y+z)%2 for x in dims for y in dims for z in dims])
+    instancer.positions = np.array([[x,y,z] for x in dims for y in dims for z in dims])/dim
+
+    cube1.color = (1.0,0.0,0.0)
+    cube1.scale = (1/(2*dim+1),1/(2*dim+1),1/(2*dim+1))
+
+    cube2.color = (0.25,0.75,1.0)
+    cube2.scale = (1/(2*dim+1),1/(2*dim+1),1/(2*dim+1))
+
+    breakpoint()
     #end custom code
     isaac_sim_runner.run()
     simulation_app.close()

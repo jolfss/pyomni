@@ -14,7 +14,7 @@ class Primitive():
         UsdPrim (Usd.Prim): The object containing the entire interface exposed to Python. 
         exists (bool): True if [prim_path] is occupied.
     Methods:
-        delete(self): Removes this prim from the stage"""
+        delete(self): Removes this prim from the stage."""
     def __init__(self, prim_path : str):
         self.prim_path = prim_path
 
@@ -35,12 +35,15 @@ class Primitive():
         """Removes this prim from the stage."""
         stage().RemovePrim(self.prim_path)
 
-class Visible(Primitive):
-    """Represents something that can be rendered or visualized.
+class Imageable(Primitive):
+    """Represents a prim that can be rendered or visualized.
     Attributes:
         visible (bool): Whether or not this geometry is visible.
+        UsdPrim (Usd.Prim): The object containing the entire interface exposed to Python. 
+        exists (bool): True if [prim_path] is occupied.
     Methods:
-        toggle(self, force_visibility:bool option): Toggles the prim's visibility."""
+        toggle(self, force_visibility:bool option): Toggles the prim's visibility.
+        delete(self): Removes this prim from the stage."""
     def __init__(self, prim_path):
             super().__init__(prim_path)
             self._is_visible = True 
