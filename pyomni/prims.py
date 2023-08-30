@@ -9,6 +9,7 @@ from pxr import UsdGeom, Usd, Gf
 # library imports
 from .core import *
 
+
 class Primitive():
     """Represents a generic primitive in the current Usd context.
     Attributes:
@@ -47,17 +48,22 @@ class Imageable(Primitive):
             self._is_visible = True 
         
     def toggle(self, force_visibility: Optional[bool] = None):
+        """Flips the visibility of a primitive unless an override is specified."""
         self._is_visible = not self.visible if force_visibility is None else force_visibility
         imageable = UsdGeom.Imageable(self.UsdPrim)
         imageable.MakeVisible() if self.visible else imageable.MakeInvisible()
 
     @property
-    def visible(self):
+    def visible(self) -> bool:
+        "The current visibility state of the imageable primitive."
         return self._is_visible
-
     @visible.setter
     def visible(self, value: bool):
         self.toggle(force_visibility=value)
+
+#----------------#
+#   attributes   #
+#----------------#
 
 class Colorable(Imageable):
     """Represents a prim that can be rendered or visualized.
@@ -68,7 +74,7 @@ class Colorable(Imageable):
 
     @property
     def color(self) -> np.ndarray:
-        """The [r,g,b] color of the cube."""
+        """A (3,) array containing the [r,g,b] color of the cube as floats in [0,1]."""
         return np.copy(self._displayColorAttr.Get())
     @color.setter
     def color(self, color : np.ndarray):
@@ -83,6 +89,7 @@ class Scaleable(Imageable):
         
     @property
     def scale(self) -> np.ndarray:
+        """A (3,) array containing the [x,y,z] scale of the primitive."""
         xformable = UsdGeom.Xformable(self.UsdPrim)
         scaleOp = None # Checks to make sure scale op hasn't been removed/changed reference.
         for op in xformable.GetOrderedXformOps():

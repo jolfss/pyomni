@@ -32,23 +32,28 @@ def main():
     simulation_app.update()
     #begin custom code
 
-    cube1 = Cube("/World/mycube")
-    cube2 = Cube("/World/mycube2")
+    redcube = Cube("/World/red")
+    greencube = Cube("/World/green")
+    bluecube = Cube("/World/blue") 
     instancer = Instancer("/World/mypointinstancer")
 
-    instancer.add_target(cube1)
-    instancer.add_target(cube2)
+    instancer.add_target(redcube)
+    instancer.add_target(greencube)
+    instancer.add_target(bluecube)
 
     dim = 50
     dims=range(-dim,dim)
-    instancer.protoindices = np.array([(x+y+z)%2 for x in dims for y in dims for z in dims])
+    instancer.protoindices = np.array([(x+y+z)%3 for x in dims for y in dims for z in dims])
     instancer.positions = np.array([[x,y,z] for x in dims for y in dims for z in dims])/dim
 
-    cube1.color = (1.0,0.0,0.0)
-    cube1.scale = (1/(2*dim+1),1/(2*dim+1),1/(2*dim+1))
+    redcube.color = (1.0,0.0,0.0)
+    redcube.scale = (1/(2*dim+1),1/(2*dim+1),1/(2*dim+1))
 
-    cube2.color = (0.25,0.75,1.0)
-    cube2.scale = (1/(2*dim+1),1/(2*dim+1),1/(2*dim+1))
+    greencube.color = (0,1.0,0)
+    greencube.scale = (1/(2*dim+1),1/(2*dim+1),1/(2*dim+1))
+
+    bluecube.color = (0,0,1.0)
+    bluecube.scale = (1/(2*dim+1),1/(2*dim+1),1/(2*dim+1))
 
     #end custom code
     isaac_sim_runner.run()

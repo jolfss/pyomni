@@ -1,5 +1,3 @@
-from typing import Union
-
 # omniverse imports
 import omni
 
@@ -7,13 +5,9 @@ import omni
 from .core import *
 
 def context():
+    """Fetches the current Usd context from a running Omniverse instance."""
     return omni.usd.get_context()
 
 def stage():
+    """Fetches the currently active stage from a running Omniverse instance."""
     return omni.usd.get_context().get_stage()
-
-#-----------#
-#   debug   #
-#-----------#
-def warn(message):
-    print(F"[pyomni] Warning: {message}")
