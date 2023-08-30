@@ -26,7 +26,7 @@ class Cube(Imageable):
         super().__init__(prim_path)
         UsdGeom.Cube.Define(stage(), prim_path)
         self._displayColorAttr = self.UsdPrim.GetAttribute('primvars:displayColor')
-        self._scaleOp = None
+        self.scale # Calling the getter to immediately satisfy the invariant and fill the self._scaleOp attribute.
 
     @property
     def color(self) -> np.ndarray:
@@ -49,7 +49,6 @@ class Cube(Imageable):
         return np.copy(scaleOp.Get())
     @scale.setter
     def scale(self, new_scales:np.ndarray):
-        pass # TODO: Fix cube scale from ndarray
-    
+        self._scaleOp.Set(new_scales)
 
 
