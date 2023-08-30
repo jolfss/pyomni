@@ -50,7 +50,6 @@ def main():
     cube2.color = (0.25,0.75,1.0)
     cube2.scale = (1/(2*dim+1),1/(2*dim+1),1/(2*dim+1))
 
-    breakpoint()
     #end custom code
     isaac_sim_runner.run()
     simulation_app.close()

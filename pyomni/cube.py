@@ -2,14 +2,11 @@
 from typing import Tuple
 import numpy as np
 
-# omniverse imports
-from pxr import UsdGeom, Gf
-
 # library imports
 from .core import stage
-from .prims import Imageable
+from .prims import *
 
-class Cube(Imageable):
+class Cube(Scaleable, Colorable):
     """Represents a Cube prim, inheriting Imageable.
 
     Attributes:
@@ -23,32 +20,11 @@ class Cube(Imageable):
     def __init__(self, prim_path : str):
         """Args:
             prim_path (str): The USD prim path where the cube should be defined."""
-        super().__init__(prim_path)
+        Scaleable.__init__(self, prim_path)
+        Colorable.__init__(self, prim_path)
         UsdGeom.Cube.Define(stage(), prim_path)
         self._displayColorAttr = self.UsdPrim.GetAttribute('primvars:displayColor')
         self.scale # Calling the getter to immediately satisfy the invariant and fill the self._scaleOp attribute.
 
-    @property
-    def color(self) -> np.ndarray:
-        return np.copy(self._displayColorAttr.Get())
-    @color.setter
-    def color(self, color : np.ndarray):
-        self._displayColorAttr.Set([(Gf.Vec3f(*color))])
-
-    @property
-    def scale(self) -> np.ndarray:
-        xformable = UsdGeom.Xformable(self.UsdPrim)
-        scaleOp = None # Checks to make sure scale op hasn't been removed/changed reference.
-        for op in xformable.GetOrderedXformOps():
-            if op.GetOpType() == UsdGeom.XformOp.TypeScale:
-                scaleOp = op
-                break
-        if not scaleOp:
-            scaleOp = xformable.AddScaleOp()
-        self._scaleOp = scaleOp
-        return np.copy(scaleOp.Get())
-    @scale.setter
-    def scale(self, new_scales:np.ndarray):
-        self._scaleOp.Set(new_scales)
 
 

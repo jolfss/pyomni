@@ -1,9 +1,10 @@
 # general python
 from typing import Union, Optional
+import numpy as np
 
 # omniverse imports
 import omni
-from pxr import UsdGeom, Usd
+from pxr import UsdGeom, Usd, Gf
 
 # library imports
 from .core import *
@@ -39,11 +40,8 @@ class Imageable(Primitive):
     """Represents a prim that can be rendered or visualized.
     Attributes:
         visible (bool): Whether or not this geometry is visible.
-        UsdPrim (Usd.Prim): The object containing the entire interface exposed to Python. 
-        exists (bool): True if [prim_path] is occupied.
     Methods:
-        toggle(self, force_visibility:bool option): Toggles the prim's visibility.
-        delete(self): Removes this prim from the stage."""
+        toggle(self, force_visibility:bool option): Toggles the prim's visibility."""
     def __init__(self, prim_path):
             super().__init__(prim_path)
             self._is_visible = True 
@@ -61,3 +59,40 @@ class Imageable(Primitive):
     def visible(self, value: bool):
         self.toggle(force_visibility=value)
 
+class Colorable(Imageable):
+    """Represents a prim that can be rendered or visualized.
+    Attribute:
+        color (ndarray): (3,) float array [r,g,b] with r,g,b in [0,1]."""
+    def __init__(self, prim_path):
+        super().__init__(prim_path)
+
+    @property
+    def color(self) -> np.ndarray:
+        """The [r,g,b] color of the cube."""
+        return np.copy(self._displayColorAttr.Get())
+    @color.setter
+    def color(self, color : np.ndarray):
+        self._displayColorAttr.Set([(Gf.Vec3f(*color))])
+
+class Scaleable(Imageable):
+    """Represents a prim that can be scaled.
+    Attribute:
+        scale (np.ndarray): (3,) float array [x,y,z] for the scale of the cube in each dimension."""
+    def __init__(self, prim_path):
+        super().__init__(prim_path)
+        
+    @property
+    def scale(self) -> np.ndarray:
+        xformable = UsdGeom.Xformable(self.UsdPrim)
+        scaleOp = None # Checks to make sure scale op hasn't been removed/changed reference.
+        for op in xformable.GetOrderedXformOps():
+            if op.GetOpType() == UsdGeom.XformOp.TypeScale:
+                scaleOp = op
+                break
+        if not scaleOp:
+            scaleOp = xformable.AddScaleOp()
+        self._scaleOp = scaleOp
+        return np.copy(scaleOp.Get())
+    @scale.setter
+    def scale(self, new_scales:np.ndarray):
+        self._scaleOp.Set(new_scales)
