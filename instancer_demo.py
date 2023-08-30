@@ -32,28 +32,39 @@ def main():
     simulation_app.update()
     #begin custom code
 
-    redcube = Cube("/World/red")
-    greencube = Cube("/World/green")
-    bluecube = Cube("/World/blue") 
-    instancer = Instancer("/World/mypointinstancer")
+    # create cubes
+    red,yellow,green,cyan,blue,purple = [Cube(F"/World/{color}") for color in {"red","yellow","green","cyan","blue","purple"}]
 
-    instancer.add_target(redcube)
-    instancer.add_target(greencube)
-    instancer.add_target(bluecube)
+    # create instancer and add cubes as targets
+    instancer = Instancer("/World/instancer")
+    [instancer.add_target(cube) for cube in [red,yellow,green,cyan,blue,purple]]
 
-    dim = 50
+    # designate transformations
+    dim = 20
     dims=range(-dim,dim)
-    instancer.protoindices = np.array([(x+y+z)%3 for x in dims for y in dims for z in dims])
+    instancer.protoindices = np.array([(x+y+z)%6 for x in dims for y in dims for z in dims])
     instancer.positions = np.array([[x,y,z] for x in dims for y in dims for z in dims])/dim
+    instancer.rotations = np.array([np.array([x,y,z,0])/np.sqrt(x*x+y*y+z*z) for x in dims for y in dims for z in dims])
+    instancer.scales = np.array([[50/(x%6+1),50/(y%6+1),50/(z%6+1)] for x in dims for y in dims for z in dims])/dim
 
-    redcube.color = (1.0,0.0,0.0)
-    redcube.scale = (1/(2*dim+1),1/(2*dim+1),1/(2*dim+1))
+    # targets will update their cloned instances when the prototype is updated
+    red.color = (1.0,0.0,0.0)
+    red.scale = (1/(2*dim+1),1/(2*dim+1),1/(2*dim+1))
 
-    greencube.color = (0,1.0,0)
-    greencube.scale = (1/(2*dim+1),1/(2*dim+1),1/(2*dim+1))
+    yellow.color = (1.0,1.0,0)
+    yellow.scale = (1/(2*dim+1),1/(2*dim+1),1/(2*dim+1))
 
-    bluecube.color = (0,0,1.0)
-    bluecube.scale = (1/(2*dim+1),1/(2*dim+1),1/(2*dim+1))
+    green.color = (0,1.0,0)
+    green.scale = (1/(2*dim+1),1/(2*dim+1),1/(2*dim+1))
+    
+    cyan.color = (0,1.0,1.0)
+    cyan.scale = (1/(2*dim+1),1/(2*dim+1),1/(2*dim+1))
+
+    blue.color = (0,0,1.0)
+    blue.scale = (1/(2*dim+1),1/(2*dim+1),1/(2*dim+1))
+
+    purple.color = (1.0,0,1.0)
+    purple.scale = (1/(2*dim+1),1/(2*dim+1),1/(2*dim+1))
 
     #end custom code
     isaac_sim_runner.run()

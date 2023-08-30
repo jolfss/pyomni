@@ -12,7 +12,9 @@ from .prims import *
 class Instancer(Imageable):
     """Python wrapper class for the UsdGeom.PointInstancer.
     Attributes:
-        positions (ndarray): (N,3) array of positions, 
+        positions (ndarray): (N,3) array of positions.
+        rotations (ndarray): (N,4) array of quaternions that indicate rotation
+        scales    (ndarray): (N,3) array of per-axis scalings.
         protoindices (ndarray): (N) array that specifies which prim should show up at each position.
             i.e., each element in [protoindices] is the index of the corresponding prim in [targets].
             Literally "prototype" indices.
@@ -36,20 +38,53 @@ class Instancer(Imageable):
         super().__init__(prim_path)
         self._PointInstancer = UsdGeom.PointInstancer.Define(stage(),self.prim_path)
         self._PositionsAttr = self._PointInstancer.GetPositionsAttr()
+        self._OrientationsAttr = self._PointInstancer.GetOrientationsAttr()
+        self._ScalesAttr = self._PointInstancer.GetScalesAttr()
         self._ProtoIndicesAttr = self._PointInstancer.GetProtoIndicesAttr()
         self._PrototypesRel = self._PointInstancer.GetPrototypesRel()
 
         #Initialize
         self._PositionsAttr.Set(Vt.Vec3fArray(1))
         self._ProtoIndicesAttr.Set(Vt.IntArray(1))
+        self._OrientationsAttr.Set(Vt.QuathArray(1))
+        self._ScalesAttr.Set(Vt.Vec3fArray(1))
+        
+        # NOTE: One day colors might work.
+        # self._colorPrimvar = UsdGeom.Primvar(self._PointInstancer.GetPrim(), 'displayColor')
+        # self._colorPrimvar.SetInterpolation(UsdGeom.Tokens.varying)
+        # self._colorPrimvar.Set(Vt.Vec3fArray(1, Gf.Vec3f(1.0, 1.0, 1.0))) 
 
     @property
     def positions(self) -> np.ndarray:
-        "A (N,3) array of [x,y,z] coordinates which designate where to put the N-th target."
+        "A (N,3) array of [x,y,z] coordinates which designate where to put the N-th instance."
         return np.copy(self._PositionsAttr.Get())
     @positions.setter
     def positions(self, np_array : np.ndarray):
        self._PositionsAttr.Set(Vt.Vec3fArray.FromNumpy(np_array))
+
+    @property
+    def rotations(self) -> np.ndarray:
+        "A (N,4) array of [w,x,y,z] quaternions which indicate the orientations of the N-th instance."
+        return np.copy(self._OrientationsAttr.Get())
+    @rotations.setter
+    def rotations(self, np_array: np.ndarray):
+        quath_array = [Gf.Quath(*q) for q in np_array]  # Convert to GfQuath type since they use half-precision here.
+        self._OrientationsAttr.Set(Vt.QuathArray(quath_array))  # Set using QuathArray
+
+    @property
+    def scales(self) -> np.ndarray:
+        "A (N,3) array of [x,y,z] scales which designate how to scale the N-th instance."
+        return np.copy(self._ScalesAttr.Get())
+    @scales.setter
+    def scales(self, np_array: np.ndarray):
+        self._ScalesAttr.Set(Vt.Vec3fArray.FromNumpy(np_array))
+
+    # @property
+    # def colors(self) -> np.ndarray:
+    #     return np.array(self._colorPrimvar.Get(), dtype=np.float32)
+    # @colors.setter
+    # def colors(self, np_array: np.ndarray):
+    #     self._colorPrimvar.Set(Vt.Vec3fArray.FromNumpy(np_array.astype(np.float32)))
     
     @property
     def protoindices(self) -> np.ndarray:
@@ -78,7 +113,8 @@ class Instancer(Imageable):
         return lst
     
     def add_target(self, target : Imageable):
-        """Adds a target to the list of prototypes--has no effect if the target is already present."""
+        """Adds a target to the list of prototypes--has no effect if the target is already present.
+        Returns: The protoindex indexing this prim among the list of targets."""
         self._PrototypesRel.AddTarget(target.prim_path)
         return self.num_targets() - 1
 
